@@ -1,0 +1,3 @@
+for each measured point,
+get closest m
+get closest right point
