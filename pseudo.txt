@@ -1,3 +1,8 @@
-for each measured point,
-get closest m
-get closest right point
+for each measured point, right pt. ,and left pt. set left measurement as origin
+rotate the LR, LM points at the angle they make [1,0,0] vector.
+fit 3 measurements equation: z = Ax(x-B),
+here: B = norm(LR), A = z/x(x-B)
+predict the model for asked linspace
+rotate back the vector
+shift L pt to its original point and the all others so
+
