@@ -1,3 +1,4 @@
+****CROSS SECT MODEL FIT****
 for each measured point, right pt. ,and left pt. set left measurement as origin
 rotate the LR, LM points at the angle they make [1,0,0] vector.
 fit 3 measurements equation: z = Ax(x-B),
@@ -5,4 +6,11 @@ here: B = norm(LR), A = z/x(x-B)
 predict the model for asked linspace
 rotate back the vector
 shift L pt to its original point and the all others so
+
+***VERTICAL INTERPOLATION***
+
+there are 30 measurements
+overall_pred -> (1770,3)
+each batch = 59## for each cross section i've 59 data
+#number of data generated of each cs -> 2*division-1 ##@line116 it is defined
 

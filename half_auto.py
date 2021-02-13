@@ -23,7 +23,8 @@ R = R_df.to_numpy()
 L = L_df.to_numpy()
 M = M_df.to_numpy()
 x_unit = np.array([1, 0, 0])
-
+vertical_step = 3
+division = 10
 """R_Nres = tools.normalize_by_axis(R)
 L_Nres = tools.normalize_by_axis(L)
 M_Nres = tools.normalize_by_axis(M)
@@ -113,7 +114,7 @@ for num in range(0, 30):
     #angle used will be based on left pt and the measurement pt, r to be decided by distance
     model = tools.poly_model(m[0], r[0], m[2])
     z_peak = r[0]/2
-    division = 30
+
     x_peak_left = np.linspace(0, z_peak, division)
     x_peak_right = np.linspace(z_peak,r[0], division)
 
@@ -152,12 +153,10 @@ for num in range(0, 30):
         rtd_back = np.vstack((rtd_back, v))
 
     rtd_back = rtd_back[1:,:]
-    print(rtd_back.shape)
+
     overall_pred = np.vstack((overall_pred, rtd_back))
-
 overall_pred = overall_pred[1:, :]
-
-
+"""
 R_all = pd.read_csv("Data/Right_UTM.xls", sep =";")
 L_all = pd.read_csv("Data/UTM_Left.xls", sep =";")
 
@@ -166,7 +165,58 @@ L_all = L_all.to_numpy()
 
 data_plot = np.vstack((R_all, L_all, overall_pred))
 
-#plot the figure preliminary
+sns.set(style = "darkgrid")
+fig = plt.figure()
+ax = fig.add_subplot(111, projection = '3d')
+
+x = data_plot[:,0]
+y = data_plot[:,1]
+z = data_plot[:,2]
+
+ax.set_xlabel("Latitude")
+ax.set_ylabel("Longitude")
+ax.set_zlabel("Depth")
+
+ax.scatter(x, y, z)
+plt.show()"""
+
+"""
+df =  pd.DataFrame(overall_pred,columns=["X_lat", "Y_lon", "Z_depth"])
+df.to_csv("Data/bathy_predict.csv", index= False)
+"""
+
+"""
+df =  pd.DataFrame(data_plot,columns=["X_lat", "Y_lon", "Z_depth"])
+df.to_csv("Data/Pred_und_border_coords.csv", index= False)
+"""
+
+
+## vertical interpolation
+tmp_arr = np.array([0, 0, 0])
+for num in range(0,29):
+    current_batch = overall_pred[num*(2 * division - 1): num*(2*division - 1) + 2 * division, :]
+    forward_batch = overall_pred[(num+1)*(2*division - 1): (num+1)*(2*division - 1) + 2 * division, :]
+    for i in range(0,2*division-1):
+        c_pt = current_batch[i,:]
+        f_pt = forward_batch[i,:]
+        x_step = np.linspace(c_pt[0], f_pt[0], vertical_step)
+        y_step = np.linspace(c_pt[1], f_pt[1], vertical_step)
+        z_step = np.linspace(c_pt[2], f_pt[2], vertical_step)
+        new_set = np.vstack((x_step, y_step, z_step)).T
+        tmp_arr = np.vstack((tmp_arr, new_set))
+tmp_arr = tmp_arr[1:, :]
+
+hor_ver_pred = np.vstack((tmp_arr, overall_pred))
+
+
+R_all = pd.read_csv("Data/Right_UTM.xls", sep =";")
+L_all = pd.read_csv("Data/UTM_Left.xls", sep =";")
+
+R_all = R_all.to_numpy()
+L_all = L_all.to_numpy()
+
+data_plot = np.vstack((R_all, L_all, hor_ver_pred))
+
 sns.set(style = "darkgrid")
 fig = plt.figure()
 ax = fig.add_subplot(111, projection = '3d')
@@ -182,5 +232,11 @@ ax.set_zlabel("Depth")
 ax.scatter(x, y, z)
 plt.show()
 
-to_csv =  pd.DataFrame(overall_pred,columns=["X_lat", "Y_lon", "Z_depth"])
-print(to_csv)
+
+
+df =  pd.DataFrame(hor_ver_pred,columns=["X_lat", "Y_lon", "Z_depth"])
+df.to_csv("Data/bathy_predict_HV_10_3S.csv", index= False)
+
+df =  pd.DataFrame(data_plot,columns=["X_lat", "Y_lon", "Z_depth"])
+df.to_csv("Data/bathy_predict_HV_BORDER_10_3S.csv", index= False)
+
