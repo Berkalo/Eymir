@@ -8,6 +8,8 @@ import  seaborn as sns
 import  tools
 from scipy.interpolate import griddata
 
+import pyproj
+ls = 50
 data = pd.read_csv("Data/Out/bathy_predict_HV_BORDER_10_3S.csv").to_numpy()
 
 Lat_f =  min(data[:,0])
@@ -17,20 +19,26 @@ Lat = data[:,0] - Lat_f
 Lon = data[:,1] - Lon_f
 Dep = data[:,2]
 
-xLon = np.linspace(min(Lon), max(Lon), 50)
-xLat = np.linspace(min(Lat), max(Lat), 50)
+xLon = np.linspace(min(Lon), max(Lon), ls)
+xLat = np.linspace(min(Lat), max(Lat), ls)
 
 X, Y = np.meshgrid(xLon, xLat)
 
 Z = grid_z1 = griddata((Lat, Lon), Dep, (X, Y), method='linear')
 
-fig,ax=plt.subplots(1,1)
-cp = ax.contourf(X, Y, Z)
-cbar = fig.colorbar(cp) # Add a colorbar to a plot
 
-ax.set_title('Filled Contours Plot')
-ax.set_xlabel('East (m)')
-ax.set_ylabel('North (m)')
+Z = Z.reshape(ls**2, 1)
+X = X.reshape(ls**2, 1)
+Y = Y.reshape(ls**2, 1)
 
-cbar.ax.set_ylabel('Depth (m)', rotation=270)
-plt.show()
+X += Lat_f
+Y += Lon_f
+
+#Y, X = pyproj.transform(UTM36N, wgs84, X, Y)
+
+result = np.hstack((X, Y, Z))
+
+
+df =  pd.DataFrame(result,columns=["X_lat", "Y_lon", "Z_depth"])
+
+df.to_csv("/home/berkalp/GeoDBs/Qgis/UTM_36N_predict_pts_no_border.csv", index= False)

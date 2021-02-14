@@ -140,6 +140,7 @@ def predict(model, x):
     return A*x*(x-B)
 
 
+
 if __name__ == "__main__":
     #test functions
     print(np.arange(30).reshape(15,2) + 10)
